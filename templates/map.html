@@ -3,37 +3,189 @@
 
 {% block head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+<style>
+  #carte {
+    height: calc(100vh - 190px);
+    min-height: 480px;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15);
+    z-index: 1;
+  }
+
+  .marqueur-station {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    font-size: 17px;
+    color: #fff;
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    border: 2.5px solid #fff;
+    border-radius: 50% 50% 50% 4px;
+    transform: rotate(-45deg);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  }
+
+  .marqueur-station span {
+    transform: rotate(45deg);
+  }
+
+  .leaflet-popup-content-wrapper {
+    border-radius: 0.75rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  .leaflet-popup-content {
+    margin: 0.9rem 1.1rem;
+    font-family: inherit;
+  }
+
+  .popup-titre {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+  }
+
+  .popup-lieu {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+  }
+
+  .popup-coords {
+    font-size: 0.78rem;
+    color: #9ca3af;
+    margin-bottom: 0.55rem;
+  }
+
+  .popup-lieu .badge {
+    font-weight: 600;
+  }
+
+  .popup-lien {
+    font-size: 0.82rem;
+  }
+
+  .cluster-personnalise {
+    background: none;
+    border: none;
+  }
+
+  .cluster-personnalise .cercle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    margin: 0 auto;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #fff;
+    background: linear-gradient(135deg, #f97316, #dc2626);
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+  }
+
+  .legende {
+    position: absolute;
+    bottom: 18px;
+    right: 12px;
+    z-index: 500;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.8rem;
+    color: #374151;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .legende .puce {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    vertical-align: middle;
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    border-radius: 50%;
+  }
+</style>
 {% endblock %}
 
 {% block contenu %}
-<h1 class="h3 mb-4">Carte des stations ({{ stations|length }})</h1>
-<div id="carte" class="shadow-sm rounded" style="height: 70vh;"></div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Carte des stations <span class="badge bg-warning text-dark">{{ stations|length }}</span></h1>
+  <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-sm">← Retour à la liste</a>
+</div>
+
+<div class="position-relative">
+  <div id="carte"></div>
+  <div class="legende"><span class="puce"></span>Station de carburant</div>
+</div>
 
 {% if not stations %}
-<div class="alert alert-info mt-3">Aucune station à afficher.</div>
+<div class="alert alert-info mt-3">
+  Aucune station à afficher. <a href="{{ url_for('nouvelle_station') }}">Ajoutez-en une</a>
+  ou <a href="{{ url_for('importer') }}">importez un fichier CSV</a>.
+</div>
 {% endif %}
 {% endblock %}
 
 {% block scripts %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script>
   const stations = {{ stations|tojson }};
-  const groupe = L.featureGroup();
 
-  const carte = L.map('carte');
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap'
+  const carte = L.map('carte', {
+    zoomControl: true,
+    attributionControl: true
+  });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 20
   }).addTo(carte);
 
+  const icone = L.divIcon({
+    className: '',
+    html: '<div class="marqueur-station"><span>⛽</span></div>',
+    iconSize: [34, 34],
+    iconAnchor: [17, 32],
+    popupAnchor: [0, -30]
+  });
+
+  const groupe = L.markerClusterGroup({
+    iconCreateFunction: cluster => L.divIcon({
+      className: 'cluster-personnalise',
+      html: `<div class="cercle">${cluster.getChildCount()}</div>`,
+      iconSize: [42, 42]
+    }),
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    maxClusterRadius: 45
+  });
+
   stations.forEach(s => {
-    L.marker([s.latitude, s.longitude])
-      .bindPopup(`<strong>${s.nom}</strong><br>${s.commune || ''} ${s.prefecture ? '— ' + s.prefecture : ''}`)
-      .addTo(groupe);
+    const lieu = [s.commune, s.prefecture].filter(Boolean).join(' — ');
+    const marker = L.marker([s.latitude, s.longitude], { icon: icone }).bindPopup(`
+      <div class="popup-titre">⛽ ${s.nom}</div>
+      <div class="popup-lieu">${lieu ? lieu.split(' — ').map(x => `<span class="badge bg-light text-dark border me-1">${x}</span>`).join('') : ''}</div>
+      <div class="popup-coords">📍 ${s.latitude.toFixed(5)}, ${s.longitude.toFixed(5)}</div>
+      <a class="popup-lien" href="https://www.openstreetmap.org/?mlat=${s.latitude}&mlon=${s.longitude}#map=17/${s.latitude}/${s.longitude}"
+         target="_blank" rel="noopener">Ouvrir dans OpenStreetMap ↗</a>
+    `);
+    groupe.addLayer(marker);
   });
 
   if (stations.length) {
-    groupe.addTo(carte);
-    carte.fitBounds(groupe.getBounds().pad(0.2));
+    carte.addLayer(groupe);
+    carte.fitBounds(groupe.getBounds().pad(0.15));
   } else {
     carte.setView([33.5731, -7.5898], 6);
   }
