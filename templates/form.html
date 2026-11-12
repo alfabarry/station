@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titre %}{{ titre }}{% endblock %}
+
+{% block contenu %}
+<h1 class="h3 mb-4">{{ titre }}</h1>
+
+<div class="card shadow-sm" style="max-width: 640px;">
+  <div class="card-body">
+    <form method="post" novalidate>
+      {{ form.hidden_tag() }}
+      {% for champ in [form.nom, form.latitude, form.longitude, form.commune, form.prefecture] %}
+        <div class="mb-3">
+          {{ champ.label(class="form-label") }}
+          {{ champ(class="form-control" + (" is-invalid" if champ.errors else "")) }}
+          {% for erreur in champ.errors %}
+            <div class="invalid-feedback">{{ erreur }}</div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+      <a href="{{ url_for('index') }}" class="btn btn-link">Annuler</a>
+    </form>
+  </div>
+</div>
+{% endblock %}
