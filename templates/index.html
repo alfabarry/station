@@ -57,7 +57,7 @@
         <td>{{ station.prefecture or "—" }}</td>
         <td class="text-end text-nowrap">
           <a class="btn btn-sm btn-outline-secondary"
-             href="https://www.openstreetmap.org/?mlat={{ station.latitude }}&mlon={{ station.longitude }}#map=16/{{ station.latitude }}/{{ station.longitude }}"
+             href="https://www.google.com/maps/search/?api=1&query={{ station.latitude }},{{ station.longitude }}"
              target="_blank" rel="noopener">📍</a>
           <a class="btn btn-sm btn-outline-primary" href="{{ url_for('modifier_station', station_id=station.id) }}">Modifier</a>
           <form class="d-inline" method="post" action="{{ url_for('supprimer_station', station_id=station.id) }}"
