@@ -8,8 +8,8 @@ Application simple de gestion de stations de carburant : nom, coordonnées géog
 - **Ajout, modification et suppression** des stations (formulaires validés)
 - **Import CSV** en masse (séparateur `;` ou `,`, encodage UTF-8)
 - **Export CSV** de toutes les données
-- **Carte interactive** (OpenStreetMap / Leaflet) avec un marqueur par station
-- Lien « voir sur OpenStreetMap » pour chaque station
+- **Carte interactive** (imagerie satellite Esri + relief OpenTopoMap) avec marqueurs personnalisés et regroupement automatique
+- Lien « voir sur Google Maps » pour chaque station
 
 ## Installation
 
