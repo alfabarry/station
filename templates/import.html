@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titre %}Import CSV{% endblock %}
+
+{% block contenu %}
+<h1 class="h3 mb-4">Importer un fichier CSV</h1>
+
+<div class="card shadow-sm" style="max-width: 640px;">
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+      <div class="mb-3">
+        <label for="fichier" class="form-label">Fichier CSV (encodage UTF-8)</label>
+        <input type="file" name="fichier" id="fichier" class="form-control" accept=".csv,.txt" required>
+      </div>
+      <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+      <a href="{{ url_for('index') }}" class="btn btn-link">Annuler</a>
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm mt-4" style="max-width: 640px;">
+  <div class="card-header">Format attendu</div>
+  <div class="card-body">
+    <p class="mb-2">En-têtes (séparateur <code>;</code> ou <code>,</code>) :</p>
+    <pre class="bg-light p-3 mb-0"><code>nom;latitude;longitude;commune;prefecture
+Total Rabat;34.02088;-6.84165;Rabat;Rabat-Salé-Kénitra
+Shell Agadir;30.42775;-9.59811;Agadir;Souss-Massa</code></pre>
+  </div>
+</div>
+{% endblock %}
