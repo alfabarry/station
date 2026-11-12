@@ -151,18 +151,8 @@
       attribution: 'Images © Esri, Maxar, Earthstar Geographics',
       maxZoom: 19
     }),
-    plan: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 20
-    }),
-    sombre: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 20
-    }),
     relief: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> - <a href="https://opentopomap.org">OpenTopoMap</a>',
+      attribution: '© <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)',
       subdomains: 'abc',
       maxZoom: 17
     })
@@ -171,8 +161,6 @@
   fonds.satellite.addTo(carte);
   L.control.layers({
     '🛰️ Satellite': fonds.satellite,
-    '🗺️ Plan': fonds.plan,
-    '🌙 Sombre': fonds.sombre,
     '⛰️ Relief': fonds.relief
   }, null, { position: 'topright', collapsed: false }).addTo(carte);
 
@@ -203,9 +191,6 @@
       <div class="popup-coords">📍 ${s.latitude.toFixed(5)}, ${s.longitude.toFixed(5)}</div>
       <a class="popup-lien" href="https://www.google.com/maps/search/?api=1&query=${s.latitude},${s.longitude}"
          target="_blank" rel="noopener">Ouvrir dans Google Maps ↗</a>
-      <span class="mx-1 text-muted">·</span>
-      <a class="popup-lien" href="https://www.openstreetmap.org/?mlat=${s.latitude}&mlon=${s.longitude}#map=17/${s.latitude}/${s.longitude}"
-         target="_blank" rel="noopener">OpenStreetMap ↗</a>
     `);
     groupe.addLayer(marker);
   });
