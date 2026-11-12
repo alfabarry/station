@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block titre %}Liste des stations{% endblock %}
+
+{% block contenu %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Stations ({{ stations|length }})</h1>
+  <a href="{{ url_for('nouvelle_station') }}" class="btn btn-primary">+ Ajouter une station</a>
+</div>
+
+<form class="row g-2 mb-4" method="get">
+  <div class="col-md-4">
+    <input type="text" name="q" class="form-control" placeholder="Rechercher un nom…"
+           value="{{ recherche }}">
+  </div>
+  <div class="col-md-3">
+    <select name="commune" class="form-select">
+      <option value="">Toutes les communes</option>
+      {% for c in communes %}
+        <option value="{{ c }}" {% if c == commune %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3">
+    <select name="prefecture" class="form-select">
+      <option value="">Toutes les préfectures</option>
+      {% for p in prefectures %}
+        <option value="{{ p }}" {% if p == prefecture %}selected{% endif %}>{{ p }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2 d-grid gap-2 d-md-flex">
+    <button class="btn btn-outline-primary flex-fill">Filtrer</button>
+    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary flex-fill">Réinitialiser</a>
+  </div>
+</form>
+
+{% if stations %}
+<div class="table-responsive">
+  <table class="table table-hover align-middle bg-white shadow-sm">
+    <thead class="table-dark">
+      <tr>
+        <th>Nom</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
+        <th>Commune</th>
+        <th>Préfecture</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for station in stations %}
+      <tr>
+        <td class="fw-semibold">{{ station.nom }}</td>
+        <td>{{ "%.5f"|format(station.latitude) }}</td>
+        <td>{{ "%.5f"|format(station.longitude) }}</td>
+        <td>{{ station.commune or "—" }}</td>
+        <td>{{ station.prefecture or "—" }}</td>
+        <td class="text-end text-nowrap">
+          <a class="btn btn-sm btn-outline-secondary"
+             href="https://www.openstreetmap.org/?mlat={{ station.latitude }}&mlon={{ station.longitude }}#map=16/{{ station.latitude }}/{{ station.longitude }}"
+             target="_blank" rel="noopener">📍</a>
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('modifier_station', station_id=station.id) }}">Modifier</a>
+          <form class="d-inline" method="post" action="{{ url_for('supprimer_station', station_id=station.id) }}"
+                onsubmit="return confirm('Supprimer cette station ?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-outline-danger">Supprimer</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+  Aucune station trouvée. <a href="{{ url_for('nouvelle_station') }}">Ajoutez-en une</a>
+  ou <a href="{{ url_for('importer') }}">importez un fichier CSV</a>.
+</div>
+{% endif %}
+{% endblock %}
