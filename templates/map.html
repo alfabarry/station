@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titre %}Carte des stations{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+{% endblock %}
+
+{% block contenu %}
+<h1 class="h3 mb-4">Carte des stations ({{ stations|length }})</h1>
+<div id="carte" class="shadow-sm rounded" style="height: 70vh;"></div>
+
+{% if not stations %}
+<div class="alert alert-info mt-3">Aucune station à afficher.</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const stations = {{ stations|tojson }};
+  const groupe = L.featureGroup();
+
+  const carte = L.map('carte');
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(carte);
+
+  stations.forEach(s => {
+    L.marker([s.latitude, s.longitude])
+      .bindPopup(`<strong>${s.nom}</strong><br>${s.commune || ''} ${s.prefecture ? '— ' + s.prefecture : ''}`)
+      .addTo(groupe);
+  });
+
+  if (stations.length) {
+    groupe.addTo(carte);
+    carte.fitBounds(groupe.getBounds().pad(0.2));
+  } else {
+    carte.setView([33.5731, -7.5898], 6);
+  }
+</script>
+{% endblock %}
