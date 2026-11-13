@@ -17,9 +17,55 @@
           {% endfor %}
         </div>
       {% endfor %}
+
+      <div class="mb-3">
+        <button type="button" id="btn-geoloc" class="btn btn-outline-success">📍 Utiliser ma position actuelle</button>
+        <div id="msg-geoloc" class="form-text mt-2"></div>
+      </div>
+
       <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
       <a href="{{ url_for('index') }}" class="btn btn-link">Annuler</a>
     </form>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const bouton = document.getElementById('btn-geoloc');
+  const message = document.getElementById('msg-geoloc');
+
+  bouton.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      message.textContent = '❌ La géolocalisation n\'est pas prise en charge par ce navigateur.';
+      message.classList.add('text-danger');
+      return;
+    }
+
+    bouton.disabled = true;
+    message.classList.remove('text-danger', 'text-success');
+    message.textContent = '⏳ Recherche de votre position…';
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        document.getElementById('latitude').value = position.coords.latitude.toFixed(6);
+        document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
+        message.textContent = '✅ Coordonnées remplies avec votre position actuelle (précision : ' + Math.round(position.coords.accuracy) + ' m).';
+        message.classList.add('text-success');
+        bouton.disabled = false;
+      },
+      erreur => {
+        const motifs = {
+          1: '❌ Accès à la position refusé. Autorisez la géolocalisation dans votre navigateur.',
+          2: '❌ Position indisponible. Vérifiez le GPS ou la connexion.',
+          3: '❌ Délai dépassé. Réessayez.'
+        };
+        message.textContent = motifs[erreur.code] || '❌ Erreur de géolocalisation.';
+        message.classList.add('text-danger');
+        bouton.disabled = false;
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  });
+</script>
 {% endblock %}
